@@ -9,56 +9,78 @@ export default class Form extends Component {
             imgInput: "",
             productNameInput: "",
             priceInput: "",
+            currentProductId: null,
         }
         this.createProduct = this.createProduct.bind(this);
+        this.handleEdit = this.handleEdit.bind(this);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+
+        if(prevProps.currentProduct.product_id !== this.props.currentProduct.product_id) {
+            this.setState({
+                imgInput: this.props.currentProduct.image,
+                productNameInput: this.props.currentProduct.name,
+                priceInput: this.props.currentProduct.price,
+                currentProductId: this.props.currentProduct.product_id
+            })
+        }
+    }
+
+    componentDidMount() {
     }
 
     handleImgChange(val) {
         this.setState({ imgInput: val})
-        // console.log("img", this.state.imgInput);
     }
  
     handleProductChange(val) {
-        this.setState({ productNameInput: val})
-        // console.log("name", this.state.productNameInput);   
+        this.setState({ productNameInput: val})  
     }
 
     handlePriceChange(val) {
         this.setState({ priceInput: val})
-        // console.log('price',this.state.priceInput);
     }
 
     handleCancel() {
         this.setState({ 
             imgInput: "",
             productNameInput: "",
-            priceInput: "", 
+            priceInput: "",
+            currentProductId: null, 
         });
-        // console.log('state', this.state);  
     }
 
     handleAdd() {
-        // this.props.getInventory();
         this.createProduct();
-        console.log("add product");
     }
 
     createProduct() {
-        axios.post('/api/product', this.state).then(() => {
+        axios.post('/api/product', {product: this.state} )
+        .then(() => {
             this.props.getInventory();
-            this.props.handleCancel();
+            this.handleCancel();
         })
     }
 
+    handleEdit() {
+        const id = this.state.currentProductId;
+        axios.put(`/api/product/${id}`, {product: this.state}).then(() => {
+            this.props.getInventory();
+            this.handleCancel();
+        })
+    }
 
     render() {
         return (
             <div>
-                <input className="input" onChange={ e => this.handleImgChange(e.target.value) } placeholder="Image URL"></input>
-                <input className="input" onChange={ e => this.handleProductChange(e.target.value) } placeholder="Product Name"></input>
-                <input className="input" onChange={ e => this.handlePriceChange(e.target.value) } placeholder="Price"></input>
+                <input className="input" onChange={ e => this.handleImgChange(e.target.value) } placeholder="Image URL" value={this.state.imgInput}></input>
+                <input className="input" onChange={ e => this.handleProductChange(e.target.value) } placeholder="Product Name" value={this.state.productNameInput}></input>
+                <input className="input" onChange={ e => this.handlePriceChange(e.target.value) } placeholder="Price" value={this.state.priceInput}></input>
                 <button onClick={() => this.handleCancel()}>Cancel</button>
-                <button onClick={() => this.handleAdd()}>Add to Inventory</button>
+
+
+                {this.state.currentProductId === null? <button onClick={() => this.handleAdd()}>Add to Inventory</button> : <button onClick={this.handleEdit}>Save Changes</button>}
             </div>
         )
     }

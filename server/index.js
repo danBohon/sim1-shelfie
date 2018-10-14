@@ -15,7 +15,9 @@ massive(process.env.connection_string).then(database => {
 });
 
 app.get( '/api/inventory', controller.getInventory );
-app.post( '/api/product', controller.createProduct )
+app.post( '/api/product', controller.createProduct );
+app.delete( '/api/product/:id', controller.deleteProduct );
+app.put( '/api/product/:id', controller.updateProduct );
 
 const port = 4000;
 app.listen(port, () => {
